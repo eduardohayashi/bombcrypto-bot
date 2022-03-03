@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-    
+# -*- coding: utf-8 -*-
 from src.logger import logger, loggerMapClicked
 from cv2 import cv2
 from os import listdir
@@ -343,6 +343,10 @@ def login():
         #TODO mto ele da erro e poco o botao n abre
         # time.sleep(10)
 
+    if clickBtn(images['connect-wallet2'], timeout = 2):
+        logger('🎉 Connect wallet 2 button detected, logging in!')
+        login_attempts = login_attempts + 1
+
     if clickBtn(images['select-wallet-2'], timeout=8):
         # sometimes the sign popup appears imediately
         login_attempts = login_attempts + 1
@@ -357,7 +361,7 @@ def login():
     if not clickBtn(images['select-wallet-1-no-hover'], ):
         if clickBtn(images['select-wallet-1-hover'], threshold = ct['select_wallet_buttons'] ):
             pass
-            # o ideal era que ele alternasse entre checar cada um dos 2 por um tempo 
+            # o ideal era que ele alternasse entre checar cada um dos 2 por um tempo
             # print('sleep in case there is no metamask text removed')
             # time.sleep(20)
     else:
@@ -532,5 +536,3 @@ if __name__ == '__main__':
 
 # colocar o botao em pt
 # soh resetar posiçoes se n tiver clickado em newmap em x segundos
-
-
