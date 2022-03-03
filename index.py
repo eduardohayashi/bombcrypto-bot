@@ -10,6 +10,7 @@ import pyautogui
 import time
 import sys
 import yaml
+import os
 
 # Load config file.
 stream = open("config.yaml", 'r')
@@ -347,6 +348,7 @@ def login():
         logger('🎉 Connect wallet 2 button detected, logging in!')
         login_attempts = login_attempts + 1
 
+
     if clickBtn(images['select-wallet-2'], timeout=8):
         # sometimes the sign popup appears imediately
         login_attempts = login_attempts + 1
@@ -459,6 +461,7 @@ def refreshHeroes():
 def main():
     """Main execution setup and loop"""
     # ==Setup==
+    windows = []
     global hero_clicks
     global login_attempts
     global last_log_is_progress
@@ -469,59 +472,56 @@ def main():
     global images
     images = load_images()
 
-    if ch['enable']:
-        global home_heroes
-        home_heroes = loadHeroesToSendHome()
-    else:
-        print('>>---> Home feature not enabled')
-    print('\n')
-
     print(cat)
-    time.sleep(7)
+    time.sleep(5)
     t = c['time_intervals']
 
-    last = {
-    "login" : 0,
-    "heroes" : 0,
-    "new_map" : 0,
-    "check_for_captcha" : 0,
-    "refresh_heroes" : 0
-    }
-    # =========
+    for w in [1,2]:
+        windows.append({
+            "window": w,
+            "login" : 0,
+            "heroes" : 0,
+            "new_map" : 0,
+            "check_for_captcha" : 0,
+            "refresh_heroes" : 0
+            })
 
     while True:
         now = time.time()
 
-        if now - last["check_for_captcha"] > addRandomness(t['check_for_captcha'] * 60):
-            last["check_for_captcha"] = now
+        for last in windows:
+            os.system('xdotool keydown alt key Tab; sleep 2; xdotool keyup alt')
+            time.sleep(2)
 
-        if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
-            last["heroes"] = now
-            refreshHeroes()
+            if now - last["check_for_captcha"] > addRandomness(t['check_for_captcha'] * 60):
+                last["check_for_captcha"] = now
 
-        if now - last["login"] > addRandomness(t['check_for_login'] * 60):
+            if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
+                last["heroes"] = now
+                refreshHeroes()
+
+            if now - last["login"] > addRandomness(t['check_for_login'] * 60):
+                sys.stdout.flush()
+                last["login"] = now
+                login()
+
+            if now - last["new_map"] > t['check_for_new_map_button']:
+                last["new_map"] = now
+
+                if clickBtn(images['new-map']):
+                    loggerMapClicked()
+
+
+            if now - last["refresh_heroes"] > addRandomness( t['refresh_heroes_positions'] * 60):
+                last["refresh_heroes"] = now
+                refreshHeroesPositions()
+
+            #clickBtn(teasureHunt)
+            logger(None, progress_indicator=True)
+
             sys.stdout.flush()
-            last["login"] = now
-            login()
 
-        if now - last["new_map"] > t['check_for_new_map_button']:
-            last["new_map"] = now
-
-            if clickBtn(images['new-map']):
-                loggerMapClicked()
-
-
-        if now - last["refresh_heroes"] > addRandomness( t['refresh_heroes_positions'] * 60):
-            last["refresh_heroes"] = now
-            refreshHeroesPositions()
-
-        #clickBtn(teasureHunt)
-        logger(None, progress_indicator=True)
-
-        sys.stdout.flush()
-
-        time.sleep(1)
-
+            time.sleep(1)
 
 
 if __name__ == '__main__':
